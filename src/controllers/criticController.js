@@ -162,12 +162,6 @@ const getCriticsByManga = async (req, res) => {
 };
 
 
-
-
-
-
-
-
 export {
   getAllCritics,
   updateCritic,
