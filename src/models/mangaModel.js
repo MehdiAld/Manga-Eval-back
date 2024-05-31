@@ -1,17 +1,13 @@
 import { mongoose, Schema } from "mongoose";
 
-const criticSchema = new Schema({
-  title: String,
-  comment: String,
-});
-
 const mangaSchema = new Schema({
   title: String,
-  critic: [criticSchema],
+  critics: [{ type: Schema.Types.ObjectId, ref: "Critics" }],
   category: String,
   image: String,
   imagesection: String,
   imagebackground: String,
+  created_at: { type: Date, default: Date.now },
 });
 
 const Manga = mongoose.model("Manga", mangaSchema);

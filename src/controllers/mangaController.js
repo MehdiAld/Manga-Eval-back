@@ -11,13 +11,26 @@ const getAllManga = async (req, res) => {
 };
 
 const createManga = async (req, res) => {
-  const { title, critic, category, image } = req.body;
+  const {
+    title,
+    critic,
+    category,
+    image,
+    imagesection,
+    imagebackground,
+    created_at,
+    date,
+  } = req.body;
   try {
     const manga = new Manga({
       title,
       critic,
       category,
       image,
+      imagesection,
+      imagebackground,
+      created_at,
+      date,
     });
 
     const savedManga = await manga.save();
@@ -48,6 +61,8 @@ const addCriticToManga = async (req, res) => {
       const criticDetails = {
         title: critic.title,
         comment: critic.comment,
+        created_at: critic.created_at,
+        notary: critic.notary,
       };
 
       manga.critic.push(criticDetails);
@@ -109,8 +124,8 @@ const removeCriticFromManga = async (req, res) => {
     );
 
     if (mangaIndex !== -1) {
-      // Correction ici
-      manga.critic.splice(mangaIndex, 1); // Correction ici
+     
+      manga.critic.splice(mangaIndex, 1);
       await manga.save();
       res.json({
         message: "Critique retirée du manga avec succès.",

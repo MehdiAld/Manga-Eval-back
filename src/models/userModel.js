@@ -8,7 +8,9 @@ const userSchema = new Schema({
     type: String,
     min: [8, "Le mot passe doit contenir au moins 8 caractères ou plus"],
   },
-  
+  created_at: { type: Date, default: Date.now },
+  isAdmin: { type: Boolean, default: false },
+  critics: [{ type: Schema.Types.ObjectId, ref: "Critics" }],
 });
 
 userSchema.methods.crypto = async (password) => {
