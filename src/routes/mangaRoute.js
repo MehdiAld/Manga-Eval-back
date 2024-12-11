@@ -14,7 +14,7 @@ mangaRouter.get("/all", getAllManga);
 
 mangaRouter.post("/add", createManga);
 
-mangaRouter.post("/:mangaId/add/:criticId", addCriticToManga);
+mangaRouter.post("/:mangaId/add/:criticId", addCriticToManga); 
 
 mangaRouter.put("/edit/:id", updateManga);
 

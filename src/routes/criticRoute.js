@@ -1,7 +1,6 @@
 import { Router } from "express";
 import {
   getAllCritics,
-  // createCriticsForManga,
   updateCritic,
   deleteCritic,
   showMeOneCritics,
@@ -10,6 +9,10 @@ import {
   getCriticsByUser,
   getUserCritics,
   getCriticsByManga,
+  likeCritic,
+  unlikeCritic,
+  getLikedCritics,
+  
 } from "../controllers/criticController";
 
 import { authMiddleware } from "../middlewares/auth";
@@ -24,6 +27,10 @@ criticRouter.put("/edit/:id", updateCritic);
 criticRouter.delete("/delete/:id", deleteCritic);
 criticRouter.get("/:id", showMeOneCritics);
 
+criticRouter.post("/:userId/like", likeCritic); 
+criticRouter.delete("/:userId/unlike/:criticId", unlikeCritic); 
+criticRouter.get("/:userId/liked", getLikedCritics); 
+
 criticRouter.post("/:mangaId/critic", authMiddleware, createCriticInManga);
 
-export default criticRouter;
+export default criticRouter; 

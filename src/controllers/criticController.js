@@ -2,6 +2,7 @@ import Critics from "../models/criticModel";
 import Manga from "../models/mangaModel";
 import User from "../models/userModel";
 
+
 const getAllCritics = async (req, res) => {
   try {
     
@@ -34,36 +35,36 @@ const getAllCritics = async (req, res) => {
 
 const createCriticForUser = async (req, res) => {
   try {
-    const { userId } = req.params; 
-    const { title, comment, mangaId } = req.body; 
+    const { userId } = req.params;
+    const { title, comment, mangaId } = req.body;
 
-   
-    const newCritic = new Critics({
-      title,
-      comment,
-      id_manga: mangaId, 
-    });
-
-   
-    const savedCritic = await newCritic.save();
-
-    
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "Utilisateur non trouvé." });
     }
 
-    
-    user.critics.push(savedCritic._id);
+    // Log les données avant insertion
+    console.log("Critique à insérer:", { title, comment, mangaId });
 
-   
+    const newCritic = new Critics({
+      title,
+      comment,
+      id_manga: mangaId,
+      username: user.username,  
+      userId: user._id,         
+    });
+
+    const savedCritic = await newCritic.save();
+
+    user.critics.push(savedCritic._id);
     await user.save();
 
     res.status(201).json({
       message: "Critique créée avec succès pour l'utilisateur.",
-      user,
+      critic: savedCritic,  
     });
   } catch (error) {
+    console.error("Erreur lors de l'insertion de la critique:", error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -162,6 +163,75 @@ const getCriticsByManga = async (req, res) => {
 };
 
 
+
+const likeCritic = async (req, res) => {
+  const userId = req.params.userId;
+  const { criticId } = req.body;
+
+  try {
+    await User.findByIdAndUpdate(userId, { $addToSet: { likedCritics: criticId } });
+    res.status(200).json({ message: "Critique aimée." });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const unlikeCritic = async (req, res) => {
+  const userId = req.params.userId;
+  const criticId = req.params.criticId;
+
+  
+  if (typeof userId !== 'string' || userId.length !== 24 || 
+      typeof criticId !== 'string' || criticId.length !== 24) {
+    return res.status(400).json({ error: "ID invalide" });
+  }
+
+  try {
+    console.log("Tentative de retirer le like pour l'utilisateur:", userId, "et la critique:", criticId);
+
+    const result = await User.findByIdAndUpdate(userId, { $pull: { likedCritics: criticId } });
+
+    if (!result) {
+      return res.status(404).json({ error: "Utilisateur non trouvé." });
+    }
+
+    console.log("Like retiré avec succès pour l'utilisateur:", userId);
+    res.status(200).json({ message: "Like retiré." });
+  } catch (error) {
+    console.error("Erreur lors de la suppression du like :", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+
+
+const getLikedCritics = async (req, res) => {
+  const userId = req.params.userId;
+
+  try {
+      console.log("User ID:", userId); 
+      const user = await User.findById(userId).populate("likedCritics");
+      if (!user) {
+          return res.status(404).json({ error: "Utilisateur non trouvé." });
+      }
+      console.log("Liked Critics:", user.likedCritics); 
+      if (user.likedCritics.length === 0) {
+          return res.status(200).json([]); 
+      }
+      res.json(user.likedCritics);
+  } catch (error) {
+      console.error("Erreur lors de la récupération des critiques aimées:", error); 
+      res.status(500).json({ error: error.message });
+  }
+};
+
+
+
+
+
+
+
 export {
   getAllCritics,
   updateCritic,
@@ -171,4 +241,7 @@ export {
   createCriticForUser,
   getUserCritics,
   getCriticsByManga,
+  likeCritic,
+  unlikeCritic,
+  getLikedCritics
 };

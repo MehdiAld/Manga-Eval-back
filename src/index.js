@@ -12,7 +12,8 @@ const port = process.env.PORT;
 async function main() {
   await mongoose.connect(process.env.MONGO_URI);
   console.log(`[📙DATABASE] MongoDB est connecté !!`);
-}
+} 
+  
 
 main().catch((err) => console.log(err));
 

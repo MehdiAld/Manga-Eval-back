@@ -3,17 +3,50 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import "dotenv/config";
 
+
+
+// const register = async (req, res) => {
+//   try {
+//     const newUser = new User();
+//     newUser.username = req.body.username;
+//     newUser.email = req.body.email;
+//     newUser.password = await newUser.crypto(req.body.password);
+//     await newUser.save();
+
+//     res.json({ message: "Utilisateur créé", newUser });
+//   } catch (error) {
+    
+//     if (error.name === 'ValidationError') {
+//       return res.status(400).json({ error: error.message });
+//     }
+   
+//     res.status(500).json({ error: "Erreur lors de la création de l'utilisateur." });
+//   }
+// };
+
 const register = async (req, res) => {
+  const { username, email, password } = req.body;
+
   try {
+    const existingUsername = await User.findOne({ username });
+    if (existingUsername) {
+      return res.status(400).json({ error: "Nom d'utilisateur déjà pris." });
+    }
+
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
+      return res.status(400).json({ error: "Email déjà associé à un autre compte." });
+    }
+
     const newUser = new User();
-    newUser.username = req.body.username;
-    newUser.email = req.body.email;
-    newUser.password = await newUser.crypto(req.body.password);
+    newUser.username = username;
+    newUser.email = email;
+    newUser.password = await newUser.crypto(password);
     await newUser.save();
 
-    res.json({ message: "User created", newUser });
+    res.json({ message: "Utilisateur créé", newUser });
   } catch (error) {
-    res.send(error);
+    res.status(500).send(error.message);
   }
 };
 
@@ -30,7 +63,7 @@ const login = async (req, res) => {
           username: user.username,
           isAdmin: user.isAdmin,
         },
-        process.env.JWT_secret,
+        process.env.JWT_SECRET,
         { expiresIn: "1h" }
       );
       res.json({ token });
@@ -45,14 +78,16 @@ const login = async (req, res) => {
   }
 };
 
+
 const GetAllUsers = async (req, res) => {
   try {
     const users = await User.find();
-    res.json(users);
+    res.status(200).json(users);
   } catch (error) {
-    res.send(error.message);
+    res.status(500).json({ error: error.message });
   }
 };
+
 
 const deleteUser = async (req, res) => {
   const userId = req.params.userId;
@@ -91,4 +126,55 @@ const updateUser = async (req, res) => {
   }
 };
 
-export { register, login, GetAllUsers, deleteUser, updateUser };
+const GetUserById = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "Utilisateur non trouvé." });
+    }
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+const UpdatePhotoProfil = async (req, res) => {
+  const { userId } = req.params;
+  const { profilePicture, banner } = req.body;
+
+  try {
+    const updateData = {};
+    if (profilePicture) updateData.profilePicture = profilePicture;
+    if (banner) updateData.banner = banner;
+
+    const user = await User.findByIdAndUpdate(userId, updateData, { new: true });
+    res.json(user); // Assure-toi que l'objet utilisateur retourné contient les nouvelles images
+  } catch (err) {
+    res.status(500).send('Erreur lors de la mise à jour du profil.');
+  }
+}
+
+
+const UpdateBanner = async (req, res) => {
+  const { userId } = req.params;
+  const { banner } = req.body; // On ne s'intéresse qu'à la bannière ici
+
+  try {
+    const updateData = {};
+    if (banner) updateData.banner = banner;
+
+    const user = await User.findByIdAndUpdate(userId, updateData, { new: true });
+    if (!user) {
+      return res.status(404).send('Utilisateur non trouvé.');
+    }
+    res.json(user); // Retourne l'utilisateur mis à jour
+  } catch (err) {
+    res.status(500).send('Erreur lors de la mise à jour de la bannière.');
+  }
+}
+
+export { register, login, GetAllUsers, deleteUser, updateUser, GetUserById, UpdatePhotoProfil, UpdateBanner };
+
+
