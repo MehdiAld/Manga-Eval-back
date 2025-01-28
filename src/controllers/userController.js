@@ -3,27 +3,6 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import "dotenv/config";
 
-
-
-// const register = async (req, res) => {
-//   try {
-//     const newUser = new User();
-//     newUser.username = req.body.username;
-//     newUser.email = req.body.email;
-//     newUser.password = await newUser.crypto(req.body.password);
-//     await newUser.save();
-
-//     res.json({ message: "Utilisateur créé", newUser });
-//   } catch (error) {
-    
-//     if (error.name === 'ValidationError') {
-//       return res.status(400).json({ error: error.message });
-//     }
-   
-//     res.status(500).json({ error: "Erreur lors de la création de l'utilisateur." });
-//   }
-// };
-
 const register = async (req, res) => {
   const { username, email, password } = req.body;
 
@@ -35,7 +14,9 @@ const register = async (req, res) => {
 
     const existingEmail = await User.findOne({ email });
     if (existingEmail) {
-      return res.status(400).json({ error: "Email déjà associé à un autre compte." });
+      return res
+        .status(400)
+        .json({ error: "Email déjà associé à un autre compte." });
     }
 
     const newUser = new User();
@@ -78,7 +59,6 @@ const login = async (req, res) => {
   }
 };
 
-
 const GetAllUsers = async (req, res) => {
   try {
     const users = await User.find();
@@ -87,7 +67,6 @@ const GetAllUsers = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
 
 const deleteUser = async (req, res) => {
   const userId = req.params.userId;
@@ -139,7 +118,6 @@ const GetUserById = async (req, res) => {
   }
 };
 
-
 const UpdatePhotoProfil = async (req, res) => {
   const { userId } = req.params;
   const { profilePicture, banner } = req.body;
@@ -149,32 +127,42 @@ const UpdatePhotoProfil = async (req, res) => {
     if (profilePicture) updateData.profilePicture = profilePicture;
     if (banner) updateData.banner = banner;
 
-    const user = await User.findByIdAndUpdate(userId, updateData, { new: true });
-    res.json(user); // Assure-toi que l'objet utilisateur retourné contient les nouvelles images
+    const user = await User.findByIdAndUpdate(userId, updateData, {
+      new: true,
+    });
+    res.json(user);
   } catch (err) {
-    res.status(500).send('Erreur lors de la mise à jour du profil.');
+    res.status(500).send("Erreur lors de la mise à jour du profil.");
   }
-}
-
+};
 
 const UpdateBanner = async (req, res) => {
   const { userId } = req.params;
-  const { banner } = req.body; // On ne s'intéresse qu'à la bannière ici
+  const { banner } = req.body;
 
   try {
     const updateData = {};
     if (banner) updateData.banner = banner;
 
-    const user = await User.findByIdAndUpdate(userId, updateData, { new: true });
+    const user = await User.findByIdAndUpdate(userId, updateData, {
+      new: true,
+    });
     if (!user) {
-      return res.status(404).send('Utilisateur non trouvé.');
+      return res.status(404).send("Utilisateur non trouvé.");
     }
-    res.json(user); // Retourne l'utilisateur mis à jour
+    res.json(user);
   } catch (err) {
-    res.status(500).send('Erreur lors de la mise à jour de la bannière.');
+    res.status(500).send("Erreur lors de la mise à jour de la bannière.");
   }
-}
+};
 
-export { register, login, GetAllUsers, deleteUser, updateUser, GetUserById, UpdatePhotoProfil, UpdateBanner };
-
-
+export {
+  register,
+  login,
+  GetAllUsers,
+  deleteUser,
+  updateUser,
+  GetUserById,
+  UpdatePhotoProfil,
+  UpdateBanner,
+};
