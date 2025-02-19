@@ -30,6 +30,4 @@ app.use("/mangas", mangaRouter);
 app.use("/critics", criticRouter);
 app.use("/auth", userRouter);
 
-app.listen(port, () =>
-  console.log(`[SERVER] is running on https://localhost:${port}`)
-);
+app.listen(port, () => console.log(`[SERVER] is running on port ${port}`));
