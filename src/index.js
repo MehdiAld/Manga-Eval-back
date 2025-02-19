@@ -17,6 +17,9 @@ async function main() {
 main().catch((err) => console.log(err));
 
 app.use(cors({ origin: process.env.FRONTEND_URL }));
+app.use(cors({ origin: "*" }));
+
+console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -26,8 +29,6 @@ app.get("/", (req, res) => console.log("Welcome To MangaEval"));
 app.use("/mangas", mangaRouter);
 app.use("/critics", criticRouter);
 app.use("/auth", userRouter);
-
-console.log(process.env.FRONTEND_URL);
 
 app.listen(port, () =>
   console.log(`[SERVER] is running on https://localhost:${port}`)
